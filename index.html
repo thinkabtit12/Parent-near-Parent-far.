@@ -12,34 +12,66 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      flex-direction: column;
     }
     #gameCanvas {
       background: #000;
       image-rendering: pixelated;
       border: 1px solid #222;
+      touch-action: none;
+    }
+    .gamepad {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 60px 60px 60px;
+      grid-template-rows: 60px 60px 60px;
+      gap: 5px;
+    }
+    .btn {
+      background: #222;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      user-select: none;
+      border: 1px solid #555;
+      touch-action: none;
+    }
+    .btn:active {
+      background: #444;
     }
   </style>
 </head>
 <body>
   <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+  <div class="gamepad">
+    <div></div>
+    <div class="btn" id="up">⬆️</div>
+    <div></div>
+    <div class="btn" id="left">⬅️</div>
+    <div></div>
+    <div class="btn" id="right">➡️</div>
+    <div></div>
+    <div class="btn" id="down">⬇️</div>
+    <div></div>
+  </div>
+
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    const gridSize = 20; // size of each step
-    let player = { x: 10, y: 10 }; // grid coords
+    const gridSize = 20;
+    let player = { x: 10, y: 10 };
 
-    // Movement control vars
-    let moveCooldown = 600; // ms between steps when holding keys (slower af)
+    let moveCooldown = 600;
     let lastMoveTime = 0;
 
-    // Track keys held
     let keysHeld = {};
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw player as white square
       ctx.fillStyle = 'white';
       ctx.fillRect(player.x * gridSize, player.y * gridSize, gridSize, gridSize);
     }
@@ -57,7 +89,6 @@
     window.addEventListener('keydown', e => {
       keysHeld[e.key] = true;
     });
-
     window.addEventListener('keyup', e => {
       keysHeld[e.key] = false;
     });
@@ -84,6 +115,20 @@
 
     draw();
     gameLoop();
+
+    // Mobile controls
+    document.getElementById('up').addEventListener('touchstart', () => triggerMove(0, -1));
+    document.getElementById('down').addEventListener('touchstart', () => triggerMove(0, 1));
+    document.getElementById('left').addEventListener('touchstart', () => triggerMove(-1, 0));
+    document.getElementById('right').addEventListener('touchstart', () => triggerMove(1, 0));
+
+    function triggerMove(dx, dy) {
+      const now = Date.now();
+      if (now - lastMoveTime >= moveCooldown) {
+        movePlayer(dx, dy);
+        lastMoveTime = now;
+      }
+    }
   </script>
 </body>
 </html>
